@@ -1,0 +1,111 @@
+/* Font URL */
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Inter:wght@400;500&display=swap");
+
+/* settings in all the website */
+* {
+    text-decoration: none;
+    font-family: "Inter",sans-serif;
+    cursor: url("img/cursor.png"), auto;
+}
+
+/* color settings */
+:root {
+    --main_color: #e6a560;
+    --bg_color: #1f1f1f;
+    --white_color: #fff;
+    --black_color: #070707;
+}
+
+body { /* background color */
+    background-color: #131313;
+}
+
+/* Start Background Lines */
+.background-lines span {
+    position: fixed;
+    top: 0;
+    z-index: -1;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    width: 1px;
+    -webkit-animation: left_Right 18s infinite;
+    animation: left_Right 18s infinite;
+}
+.background-lines span:nth-child(1) {
+    left: 10%;
+}
+.background-lines span:nth-child(2) {
+    left: 20%;
+}
+.background-lines span:nth-child(3) {
+    left: 30%;
+}
+.background-lines span:nth-child(4) {
+    left: 40%;
+}
+.background-lines span:nth-child(5) {
+    left: 50%;
+}
+.background-lines span:nth-child(6) {
+    left: 60%;
+}
+.background-lines span:nth-child(7) {
+    left: 70%;
+}
+.background-lines span:nth-child(8) {
+    left: 80%;
+}
+.background-lines span:nth-child(9) {
+    left: 90%;
+}
+.background-lines span:nth-child(10) {
+    left: 100%;
+}
+@keyframes left_Right {
+    0% {
+        -webkit-transform: translateX(0);
+        transform: translateX(0);
+    }
+
+    50% {
+        -webkit-transform: translateX(-100px);
+        transform: translateX(-100);
+    }
+
+    100% {
+        -webkit-transform: translateX(0);
+        transform: translateX(0);
+    }
+}
+/* End Background Lines */
+
+.e404 {
+    margin: 320px auto;
+    text-align: center;
+}
+
+span { /* any span */
+    color: var(--main_color);
+    font-size: 36px;
+    margin: 15px;
+}
+
+.e404 p {
+    color: var(--white_color);
+    font-size: 18px;
+}
+
+.btn {
+    font-weight: bold;
+    display: inline-block;
+    padding: 10px 20px;
+    background: var(--main_color);
+    color: var(--black_color);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    scale: 1.1;
+}
