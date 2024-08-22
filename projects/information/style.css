@@ -1,0 +1,104 @@
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #222727;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Ensures full viewport height */
+  padding: 20px; /* Adds some space around the content */
+}
+
+.card-container {
+  perspective: 1000px;
+}
+
+.card {
+  width: 300px;
+  background-color: black;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s;
+  color: white;
+}
+
+.card:hover {
+  transform: rotateY(10deg);
+}
+
+.avatar {
+  width: 100px;
+  border-radius: 50%;
+  margin-top: 30px;
+}
+
+.info {
+  text-align: center;
+  padding: 20px;
+}
+
+h1, h4 {
+  color: white;
+  margin: 10px 0;
+}
+
+p {
+  color: white;
+  font-size: 0.9em;
+}
+
+.social-icons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.social-icons img {
+  width: 24px;
+  margin: 0 10px;
+}
+
+.social-icons a {
+  transition: transform 0.3s;
+}
+
+.social-icons a:hover {
+  transform: scale(1.2);
+}
+
+.Languages img {
+  width: 24px;
+  margin: 0 3px;
+  transition: transform 0.3s;
+}
+
+.Languages img:hover {
+  transform: scale(1.2);
+}
+
+/* Responsive Styles */
+@media (min-width: 600px) {
+  .card {
+      width: 350px;
+  }
+
+  .avatar {
+      width: 120px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card {
+      width: 400px;
+  }
+
+  .avatar {
+      width: 150px;
+  }
+}
