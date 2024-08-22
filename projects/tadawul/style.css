@@ -1,0 +1,46 @@
+body {
+  background: url('images/background.png');
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align:center;
+}
+input, button {
+  font-size: 20px;
+  padding: 15px;
+  border-radius: 15px;
+  border: none;
+}
+button {
+  color: white;
+  background: black;
+}
+
+p {
+  background: white;
+  width: 230px;
+  padding: 5px;
+  border-radius: 50px;
+  margin: 20 auto;
+}
+
+img { 
+  width: 100%; 
+  max-width: 500%; 
+}
+
+@media (min-width: 600px) {
+  body {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  div {
+    flex: 1;
+  }
+
+  img {
+    width: 45%;
+  }
+}
+
