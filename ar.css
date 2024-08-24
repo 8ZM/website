@@ -123,6 +123,9 @@ header .links .logo,
         font-size: 14px;
     }
 
+    .projects .project_box img {
+        border-radius: 5px;
+    }
     .projects .project_box .text {
         width: calc(50% - 50px);
         margin-left: 50px;
@@ -167,7 +170,7 @@ header .links .logo,
     /* End Responsive Contact*/
 }
 
-@media (max-width:500px) {
+@media (max-width:512px) {
     header nav .icons a {
         font-size: 20px;
     }
@@ -184,5 +187,119 @@ header .links .logo,
     
     .icon_menu {
         margin-left: 15px;
+    }
+
+    .home .div_text h4 {
+        font-size: 22px;
+    }
+
+    .home .div_text h1 {
+        font-size: 40px;
+    }
+
+    .home .div_text h2 span {
+        font-size: 35px;
+    }
+
+    .home .div_text p {
+        font-size: 14px;
+        margin: 25px auto;
+        width: 100%;
+    }
+
+    .home .btn {
+        font-size: 16px;
+        padding: 14px 30px;
+    }
+
+    .home .div_img {
+        width: 75%;
+    }
+
+    .about .div_text h2 {
+        font-size: 30px;
+    }
+
+    .about .div_text h4 {
+        font-size: 20px;
+    }
+
+    .about .div_text p {
+        font-size: 14px;
+    }
+
+    .btn_no_bg {
+        margin: 5px;
+        font-size: 11px;
+    }
+
+    .about .div_text ul li {
+        width: 100%;
+        font-size: 14px;
+    }
+
+    .about .div_img {
+        width: 85%;
+    }
+
+    .top_section h2 {
+        font-size: 22px;
+    }
+
+    .services .boxs .box {
+        width: 100%;
+    }
+
+    .services .boxs .box i {
+        font-size: 55px;
+    }
+
+    .projects .project_box, 
+    .projects .project_box.project_box2 {
+        flex-direction: column;
+    }
+
+    .projects .project_box img {
+        width: 100%;
+        border-radius: 5px;
+        margin-bottom: 30px;
+    }
+
+    .projects .project_box .text {
+        width: 100%;
+        margin-left: 0; /*                                   */
+    }
+
+    .projects .project_box .text p {
+        margin: 20px 0 30px;
+    }
+
+    .contact .social_contact .links {
+        flex-direction: column;
+    }
+
+    .contact .social_contact .links a {
+        width: 100%;
+    }
+
+    .projects {
+        padding-bottom: 40px;
+    }
+    .contact {
+        padding-top: 0;
+    }
+
+    .contact .top_section {
+        margin-bottom: 60px;
+    }
+
+    .contact form {
+        width: 100%;
+    }
+
+    .contact form .input_form input {
+        width: 100%;
+        padding: 15px 20px;
+        margin-bottom: 20px;
     }
 }
