@@ -1,14 +1,5 @@
-/* ════════════════════════════════════════════════════════════════
-   ResumeAI — ATS Optimizer · script.js
-   ════════════════════════════════════════════════════════════════
-
-   ┌─────────────────────────────────────────────────────────────┐
-   │  ضع مفتاح Groq API هنا — سيستخدمه جميع الزوار              │
-   │  Put your Groq API key here — used for all visitors          │
-   │  احصل عليه مجاناً من console.groq.com — يبدأ بـ gsk_        │
-   └─────────────────────────────────────────────────────────────┘ */
-
-const GROQ_API_KEY = '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';
+const API_PROXY_URL = 'https://groq-proxy.mishary-fgh.workers.dev/';
+const GROQ_API_KEY = '';
 
 /* ════════════════════════════════════════════════════════════════
    LANGUAGE DATA
@@ -16,11 +7,11 @@ const GROQ_API_KEY = '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';
 const LANG = {
   en: {
     dir: 'ltr',
-    nav: { brand: 'ATS Resume Optimizer', cta: 'Start Free', toggle: 'عربي' },
+    nav: { brand: 'ATS Optimizer' },
     hero: {
-      badge: 'ATS Resume Optimizer',
+      badge: 'Professional ATS Optimization',
       l1: 'Land Interviews,', l2: 'Not the Trash Folder',
-      sub: 'Upload your resume and job description. Our AI analyzes, optimizes, and tailors everything — resume, cover letter, and interview prep — in seconds.',
+      sub: 'Upload your resume and job description. Get an optimized resume, tailored cover letter, and interview prep — all in seconds.',
       cta: 'Upload Your Resume →', fine: 'No signup required. 100% free to use.',
       stats: ['ATS Pass Rate', 'More Interviews', 'Average Time'],
     },
@@ -29,7 +20,7 @@ const LANG = {
       steps: [
         { icon: '📄', t: 'Upload Resume', d: 'PDF or DOCX — drag & drop or click to browse' },
         { icon: '📋', t: 'Add Job Description', d: 'Paste the job description text or upload the file' },
-        { icon: '🤖', t: 'AI Analyzes & Optimizes', d: 'ATS score, keyword gaps, resume rewrite, more' },
+        { icon: '⚙️', t: 'Analysis & Optimization', d: 'ATS score, keyword gaps, professional resume rewrite' },
         { icon: '🚀', t: 'Download & Apply', d: 'Optimized resume, cover letter & interview prep' },
       ],
     },
@@ -37,7 +28,7 @@ const LANG = {
       title: 'Everything You Need to Get Hired',
       items: [
         { icon: '🎯', t: 'ATS Score Analysis', d: 'Real-time match scoring against job requirements with detailed breakdowns' },
-        { icon: '✏️', t: 'Resume Optimization', d: 'AI rewrites bullets and summaries using your real experience — never fabricated' },
+        { icon: '✏️', t: 'Resume Optimization', d: 'Professionally rewritten bullets and summaries using your real experience — never fabricated' },
         { icon: '📝', t: 'Cover Letter Generator', d: 'Tailored professional cover letters matched to every job you apply for' },
         { icon: '🎤', t: 'Interview Preparation', d: 'HR, behavioral, and technical Q&A based on the actual job description' },
         { icon: '🔍', t: 'Keyword Gap Analysis', d: 'Identify every missing keyword ATS systems filter for' },
@@ -48,16 +39,17 @@ const LANG = {
     faq: {
       title: 'Frequently Asked Questions',
       items: [
-        { q: 'Is my resume data private?', a: 'Your files are processed temporarily in your browser session and never stored on any server. Only the extracted text is sent to the AI API for analysis.' },
-        { q: 'Does the AI invent experience?', a: 'Never. Our AI only optimizes existing information. It improves wording, structure, and keyword alignment — it never fabricates jobs, degrees, or skills.' },
+        { q: 'Is my resume data private?', a: 'Your files are processed temporarily in your browser session and never stored on any server.' },
+        { q: 'Does the optimizer invent experience?', a: 'Never. It only optimizes existing information — improving wording, structure, and keyword alignment. It never fabricates jobs, degrees, or skills.' },
         { q: 'What file formats are supported?', a: 'We support PDF and DOCX for resumes. Job descriptions can be pasted as text or uploaded as PDF, DOCX, or TXT.' },
         { q: 'How long does the analysis take?', a: 'Typically 15–30 seconds depending on document length.' },
         { q: 'Is it really free?', a: 'Yes. This tool is completely free to use. No signup, no payment, no credit card required.' },
+        { q: 'Need help?', a: 'Contact our support team at support@mfag.sa — we usually reply within 24 hours.' },
       ],
     },
-    footer: '© 2025 ResumeAI · AI-Powered · No data stored · No signup required',
+    footer: '© 2025 ATS Optimizer · No data stored · No signup required',
     app: {
-      badge: 'AI-Powered', title: 'Optimize Your Resume', restart: '← Start Over',
+      badge: 'ATS Optimizer', title: 'Optimize Your Resume', restart: '← Start Over',
       s1t: 'Upload Resume', s1s: 'Supports PDF and DOCX',
       s1drag: 'Drag & drop your resume here', s1or: 'or', s1browse: 'Browse Files', s1hint: 'PDF or DOCX accepted',
       s1remove: '✕ Remove', s1next: 'Continue →',
@@ -66,7 +58,7 @@ const LANG = {
       s2ph: 'Paste the full job description here...',
       s2uploadtxt: 'Click or drag to upload JD file',
       s2back: '← Back', s2next: 'Analyze Resume',
-      s3t: 'Analyzing your resume…', s3s: 'AI is comparing your resume against the job requirements.',
+      s3t: 'Analyzing your resume…', s3s: 'Comparing your resume against the job requirements.',
       s3tip: 'Usually takes 15–30 seconds',
       scoreTitle: 'ATS Match Score', ringLbl: 'ATS Score',
       pSkills: 'Skills Match', pExp: 'Experience Match', pEdu: 'Education Match', pKw: 'Keywords Match',
@@ -74,7 +66,7 @@ const LANG = {
       misSkillsLbl: 'Missing Skills:', sugLbl: 'Suggestions:',
       tl0: 'Optimized Resume', tl1: 'Cover Letter', tl2: 'Interview Prep',
       gen0: 'Generate Optimized Resume', gen1: 'Generate Cover Letter', gen2: 'Generate Interview Prep',
-      generating: 'Generating with AI…',
+      generating: 'Generating…',
       readyTxt: 'Ready to generate — click below.',
       copy: 'Copy', copied: 'Copied!', dlPdf: '↓ PDF', dlDocx: '↓ Word (DOCX)', dlTxt: '↓ TXT', regen: '↺ Regenerate', tpl1: '↓ PDF · Classic', tpl2: '↓ PDF · Navy Pro', tpl3: '↓ PDF · Minimal',
       genAll: '⚡ Generate Everything',
@@ -82,76 +74,6 @@ const LANG = {
       errJD: 'Please enter or upload a job description.',
       errKey: 'API key not configured. Please contact the site owner.',
       extracted: n => `✓ Content extracted — ${n} characters`,
-    },
-  },
-  ar: {
-    dir: 'rtl',
-    nav: { brand: 'ريزيوم AI', cta: 'ابدأ مجاناً', toggle: 'English' },
-    hero: {
-      badge: 'تحسين السيرة الذاتية بالذكاء الاصطناعي',
-      l1: 'احصل على المقابلات،', l2: 'لا على سلة المهملات',
-      sub: 'ارفع سيرتك الذاتية وصف الوظيفة. يقوم الذكاء الاصطناعي بالتحليل والتحسين وإعداد كل شيء — سيرة ذاتية وخطاب تغطية وتحضير للمقابلة — في ثوانٍ.',
-      cta: 'ارفع سيرتك الذاتية ←', fine: 'بدون تسجيل. مجاني 100%.',
-      stats: ['معدل اجتياز ATS', 'مزيد من المقابلات', 'متوسط الوقت'],
-    },
-    how: {
-      badge: 'كيف يعمل', sub: 'أربع خطوات من الرفع إلى الجاهزية للمقابلة',
-      steps: [
-        { icon: '📄', t: 'ارفع السيرة الذاتية', d: 'PDF أو DOCX — اسحب وأفلت أو انقر للاستعراض' },
-        { icon: '📋', t: 'أضف وصف الوظيفة', d: 'الصق نص الوصف الوظيفي أو ارفع الملف' },
-        { icon: '🤖', t: 'الذكاء الاصطناعي يحلل ويحسّن', d: 'درجة ATS، الكلمات المفقودة، إعادة كتابة السيرة' },
-        { icon: '🚀', t: 'حمّل وقدّم', d: 'سيرة محسّنة وخطاب تغطية وتحضير مقابلة' },
-      ],
-    },
-    feat: {
-      title: 'كل ما تحتاجه للحصول على وظيفة',
-      items: [
-        { icon: '🎯', t: 'تحليل درجة ATS', d: 'تقييم فوري للمطابقة مع متطلبات الوظيفة مع تفاصيل شاملة' },
-        { icon: '✏️', t: 'تحسين السيرة الذاتية', d: 'يعيد الذكاء الاصطناعي الكتابة بناءً على خبرتك الحقيقية فقط' },
-        { icon: '📝', t: 'مولّد خطاب التغطية', d: 'خطابات تغطية احترافية مخصصة لكل وظيفة تتقدم إليها' },
-        { icon: '🎤', t: 'تحضير المقابلة', d: 'أسئلة وأجوبة HR وسلوكية وتقنية بناءً على الوصف الوظيفي' },
-        { icon: '🔍', t: 'تحليل الثغرات في الكلمات المفتاحية', d: 'تحديد كل كلمة مفتاحية مفقودة تفلترها أنظمة ATS' },
-        { icon: '📥', t: 'تحميل النتائج', d: 'انسخ أو حمّل مستنداتك المحسّنة فوراً' },
-      ],
-    },
-    cta: { title: 'مستعد للتغلب على نظام ATS؟', sub: 'ارفع سيرتك الذاتية الآن واحصل على نسخة محسّنة في أقل من دقيقة.' },
-    faq: {
-      title: 'الأسئلة الشائعة',
-      items: [
-        { q: 'هل بياناتي في السيرة الذاتية خاصة؟', a: 'تتم معالجة ملفاتك مؤقتاً في جلسة المتصفح ولا يتم تخزينها على أي خادم. يُرسل النص المستخرج فقط للذكاء الاصطناعي للتحليل.' },
-        { q: 'هل يخترع الذكاء الاصطناعي خبرات؟', a: 'أبداً. يحسّن الذكاء الاصطناعي الصياغة والبنية والكلمات المفتاحية فقط — ولا يختلق وظائف أو شهادات أو مهارات.' },
-        { q: 'ما صيغ الملفات المدعومة؟', a: 'ندعم PDF وDOCX للسير الذاتية. يمكن لصق أوصاف الوظائف كنص أو رفعها بصيغة PDF أو DOCX أو TXT.' },
-        { q: 'كم يستغرق التحليل؟', a: 'عادةً 15–30 ثانية حسب طول المستند.' },
-        { q: 'هل هو مجاني حقاً؟', a: 'نعم. هذه الأداة مجانية تماماً. لا تسجيل ولا دفع ولا بطاقة ائتمان.' },
-      ],
-    },
-    footer: '© 2025 ريزيوم AI · مدعوم بالذكاء الاصطناعي · لا يتم تخزين البيانات',
-    app: {
-      badge: 'مدعوم بالذكاء الاصطناعي', title: 'حسّن سيرتك الذاتية', restart: 'البدء من جديد →',
-      s1t: 'ارفع السيرة الذاتية', s1s: 'يدعم PDF وDOCX',
-      s1drag: 'اسحب وأفلت سيرتك الذاتية هنا', s1or: 'أو', s1browse: 'استعراض الملفات', s1hint: 'PDF أو DOCX',
-      s1remove: '✕ إزالة', s1next: 'متابعة ←',
-      s2t: 'الوصف الوظيفي', s2s: 'الصق النص أو ارفع ملفاً.',
-      s2paste: '📋 الصق النص', s2upload: '📁 ارفع ملف',
-      s2ph: 'الصق الوصف الوظيفي الكامل هنا...',
-      s2uploadtxt: 'انقر أو اسحب لرفع ملف JD',
-      s2back: 'رجوع →', s2next: 'تحليل السيرة الذاتية',
-      s3t: 'جاري التحليل…', s3s: 'الذكاء الاصطناعي يقارن سيرتك الذاتية بمتطلبات الوظيفة.',
-      s3tip: 'عادةً يستغرق 15–30 ثانية',
-      scoreTitle: 'درجة مطابقة ATS', ringLbl: 'درجة ATS',
-      pSkills: 'مطابقة المهارات', pExp: 'مطابقة الخبرة', pEdu: 'مطابقة التعليم', pKw: 'مطابقة الكلمات المفتاحية',
-      misTitle: 'الكلمات المفتاحية المفقودة', strTitle: 'نقاط قوتك',
-      misSkillsLbl: 'المهارات المفقودة:', sugLbl: 'اقتراحات:',
-      tl0: 'السيرة الذاتية المحسّنة', tl1: 'خطاب التغطية', tl2: 'تحضير المقابلة',
-      gen0: 'إنشاء سيرة ذاتية محسّنة', gen1: 'إنشاء خطاب التغطية', gen2: 'إنشاء تحضير المقابلة',
-      generating: 'جاري الإنشاء بالذكاء الاصطناعي…',
-      readyTxt: 'جاهز للإنشاء — انقر أدناه.',
-      copy: 'نسخ', copied: 'تم النسخ!', dlPdf: '↓ PDF', dlDocx: '↓ Word (DOCX)', dlTxt: '↓ TXT', regen: '↺ إعادة الإنشاء', tpl1: '↓ PDF · كلاسيكي', tpl2: '↓ PDF · كحلي احترافي', tpl3: '↓ PDF · بسيط',
-      genAll: '⚡ إنشاء كل شيء',
-      errFile: 'يرجى رفع ملف PDF أو DOCX.',
-      errJD: 'يرجى إدخال أو رفع وصف الوظيفة.',
-      errKey: 'مفتاح API غير مضبوط. يرجى التواصل مع مالك الموقع.',
-      extracted: n => `✓ تم استخراج المحتوى — ${n} حرف`,
     },
   },
 };
@@ -189,7 +111,7 @@ const GROQ_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
 let groqModel = null;
 
 async function ai(system, user, maxTok = 2000) {
-  if (!GROQ_API_KEY || GROQ_API_KEY === 'YOUR_GROQ_API_KEY_HERE') {
+  if (!API_PROXY_URL && !GROQ_API_KEY) {
     throw new Error(t.app.errKey);
   }
   const models = groqModel ? [groqModel, ...GROQ_MODELS.filter(m => m !== groqModel)] : GROQ_MODELS;
@@ -199,12 +121,12 @@ async function ai(system, user, maxTok = 2000) {
     // Up to 2 attempts per model (handles rate-limit spikes)
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const endpoint = API_PROXY_URL || 'https://api.groq.com/openai/v1/chat/completions';
+        const headers = { 'Content-Type': 'application/json' };
+        if (!API_PROXY_URL) headers['Authorization'] = `Bearer ${GROQ_API_KEY}`;
+        const res = await fetch(endpoint, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${GROQ_API_KEY}`,
-          },
+          headers,
           body: JSON.stringify({
             model,
             messages: [
@@ -313,18 +235,11 @@ function applyLang() {
   renderAppText();
 }
 
-function toggleLang() {
-  lang = lang === 'en' ? 'ar' : 'en';
-  applyLang();
-}
-
 /* ════════════════════════════════════════════════════════════════
    LANDING RENDER
    ════════════════════════════════════════════════════════════════ */
 function renderLanding() {
   tx('brandName', t.nav.brand); tx('footerBrand', t.nav.brand);
-  $('langBtn').textContent = t.nav.toggle;
-  $('navCtaBtn').textContent = t.nav.cta;
   $('heroCtaBtn').textContent = t.hero.cta;
   $('ctaBandBtn').textContent = t.hero.cta;
 
@@ -381,7 +296,7 @@ function renderAppText() {
   $('restartBtn').textContent = a.restart;
   // step labels
   tx('sl1', a.s1t); tx('sl2', a.s2t);
-  tx('sl3', lang === 'en' ? 'Analysis' : 'التحليل'); tx('sl4', lang === 'en' ? 'Results' : 'النتائج');
+  tx('sl3', 'Analysis'); tx('sl4', 'Results');
   // step 1
   tx('s1Title', a.s1t); tx('s1Sub', a.s1s);
   tx('s1DragTxt', a.s1drag); tx('s1OrTxt', a.s1or);
@@ -689,17 +604,19 @@ function renderTab(idx) {
       </div>`;
     return;
   }
-  const pdfBtns = (idx === 0 && resumeJSON)
+  const dlBtns = (idx === 0 && resumeJSON)
     ? `<button class="btn-primary btn-sm" onclick="dlPdfTpl(1)">${t.app.tpl1}</button>
+       <button class="btn-secondary btn-sm" onclick="dlDocxTpl(1)">Word · Classic</button>
        <button class="btn-primary btn-sm" onclick="dlPdfTpl(2)">${t.app.tpl2}</button>
-       <button class="btn-primary btn-sm" onclick="dlPdfTpl(3)">${t.app.tpl3}</button>`
-    : `<button class="btn-primary btn-sm" onclick="dlPdf(${idx})">${t.app.dlPdf}</button>`;
+       <button class="btn-secondary btn-sm" onclick="dlDocxTpl(2)">Word · Navy Pro</button>
+       <button class="btn-primary btn-sm" onclick="dlPdfTpl(3)">${t.app.tpl3}</button>
+       <button class="btn-secondary btn-sm" onclick="dlDocxTpl(3)">Word · Minimal</button>`
+    : `<button class="btn-primary btn-sm" onclick="dlPdf(${idx})">${t.app.dlPdf}</button>
+       <button class="btn-primary btn-sm" onclick="dlDocx(${idx})">${t.app.dlDocx}</button>`;
   box.innerHTML = `
     <div class="result-box">${esc(results[idx])}</div>
     <div class="result-actions">
-      ${pdfBtns}
-      <button class="btn-primary btn-sm" onclick="dlDocx(${idx})">${t.app.dlDocx}</button>
-      <button class="btn-secondary btn-sm" onclick="dlTab(${idx},'${fnames[idx]}')">${t.app.dlTxt}</button>
+      ${dlBtns}
       <button class="btn-secondary btn-sm" id="cpyBtn${idx}" onclick="copyTab(${idx})">${t.app.copy}</button>
       <button class="btn-secondary btn-sm" onclick="generate(${idx})">${t.app.regen}</button>
     </div>`;
@@ -722,7 +639,17 @@ async function genResume() {
   busy[0] = true; renderTab(0);
   try {
     const raw = await gemini(
-      `You are an expert resume writer and ATS optimization specialist.
+      `You are a top 1% professional resume writer with 15+ years of experience, certified in ATS optimization (CPRW-level expertise). You have written thousands of resumes that passed Fortune 500 ATS systems.
+
+YOUR PROFESSIONAL STANDARDS:
+- Every bullet starts with a strong action verb (Led, Engineered, Streamlined, Resolved, Implemented — never "Responsible for" or "Worked on")
+- Quantify wherever the original data allows: percentages, counts, timeframes, budgets (use ONLY numbers present in the original — never invent metrics)
+- Mirror the EXACT keywords and terminology from the job description wherever the candidate genuinely has that experience (ATS systems match exact phrases)
+- Present tense for current roles, past tense for previous roles
+- No first-person pronouns (I, my, me) anywhere
+- Concise, high-impact phrasing — cut filler words
+- Professional summary: 3-4 sentences positioning the candidate for THIS specific role using their real background
+
 CRITICAL — NEVER BREAK:
 - Never invent, fabricate, or add any experience, job, employer, date, degree, certification, project, skill, or achievement.
 - Only rewrite and optimize what is genuinely in the resume.
@@ -971,6 +898,198 @@ function dlPdfTpl(n) {
   else styledResumePdf(resumeJSON);
 }
 
+function dlDocxTpl(n) {
+  if (!resumeJSON) return;
+  if (n === 1) classicResumeDocx(resumeJSON);
+  else if (n === 3) minimalResumeDocx(resumeJSON);
+  else styledResumeDocx(resumeJSON);
+}
+
+/* Shared DOCX helpers */
+function docxSave(docFile, name) {
+  window.docx.Packer.toBlob(docFile).then(blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+}
+
+/* ── TEMPLATE 1 DOCX — Classic ATS ── */
+function classicResumeDocx(dta) {
+  const d = window.docx, TAB = d.TabStopPosition.MAX;
+  const ch = [];
+  const c = dta.contact || {};
+  // Name centered
+  ch.push(new d.Paragraph({
+    alignment: d.AlignmentType.CENTER,
+    children: [new d.TextRun({ text: (dta.name || '').toUpperCase(), bold: true, size: 56, font: 'Arial' })]
+  }));
+  if (dta.title) ch.push(new d.Paragraph({
+    alignment: d.AlignmentType.CENTER, spacing: { before: 80 },
+    children: [new d.TextRun({ text: dta.title, bold: true, size: 24, font: 'Arial' })]
+  }));
+  const ct = [c.location, c.email, c.phone, c.linkedin].filter(v => v && String(v).trim()).join('  |  ');
+  if (ct) ch.push(new d.Paragraph({
+    alignment: d.AlignmentType.CENTER, spacing: { before: 60, after: 200 },
+    children: [new d.TextRun({ text: ct, size: 20, font: 'Arial' })]
+  }));
+
+  const head = t => ch.push(new d.Paragraph({
+    spacing: { before: 280, after: 120 },
+    border: { bottom: { color: '1E1E1E', size: 12, style: d.BorderStyle.SINGLE } },
+    children: [new d.TextRun({ text: t, bold: true, size: 30, font: 'Arial' })]
+  }));
+  const bullet = t => ch.push(new d.Paragraph({
+    bullet: { level: 0 }, spacing: { after: 50 },
+    children: [new d.TextRun({ text: t, size: 21, font: 'Arial' })]
+  }));
+
+  if (dta.summary) {
+    head('PROFESSIONAL SUMMARY');
+    ch.push(new d.Paragraph({ children: [new d.TextRun({ text: dta.summary, size: 21, font: 'Arial' })] }));
+  }
+
+  if ((dta.experience || []).length) {
+    head('WORK EXPERIENCE');
+    for (const j of dta.experience) {
+      ch.push(new d.Paragraph({
+        spacing: { before: 140 },
+        children: [new d.TextRun({ text: j.title || '', bold: true, size: 23, font: 'Arial' })]
+      }));
+      ch.push(new d.Paragraph({
+        tabStops: [{ type: d.TabStopType.RIGHT, position: TAB }], spacing: { after: 80 },
+        children: [new d.TextRun({ text: j.company || '', bold: true, size: 21, font: 'Arial' }),
+        new d.TextRun({ text: '\t' + (j.dates || ''), bold: true, size: 21, font: 'Arial' })]
+      }));
+      for (const b of j.bullets || []) bullet(b);
+    }
+  }
+
+  if ((dta.education || []).length) {
+    head('EDUCATION');
+    for (const e of dta.education) {
+      ch.push(new d.Paragraph({ children: [new d.TextRun({ text: e.degree || '', bold: true, size: 23, font: 'Arial' })] }));
+      ch.push(new d.Paragraph({
+        tabStops: [{ type: d.TabStopType.RIGHT, position: TAB }], spacing: { after: 100 },
+        children: [new d.TextRun({ text: e.school || '', bold: true, size: 21, font: 'Arial' }),
+        new d.TextRun({ text: '\t' + [e.dates, e.note].filter(Boolean).join(' · '), size: 21, font: 'Arial' })]
+      }));
+    }
+  }
+
+  const skills = [...(dta.hardSkills || []), ...(dta.softSkills || [])];
+  if (skills.length) {
+    head('SKILLS');
+    for (let i = 0; i < skills.length; i += 4) bullet(skills.slice(i, i + 4).join(', '));
+  }
+
+  if ((dta.projects || []).length) {
+    head('PROJECTS');
+    for (const p of dta.projects) {
+      ch.push(new d.Paragraph({ children: [new d.TextRun({ text: p.name || '', bold: true, size: 23, font: 'Arial' })] }));
+      if (p.description) ch.push(new d.Paragraph({ spacing: { after: 60 }, children: [new d.TextRun({ text: p.description, size: 21, font: 'Arial' })] }));
+      for (const b of p.bullets || []) bullet(b);
+    }
+  }
+
+  if ((dta.certifications || []).length) {
+    head('CERTIFICATIONS');
+    for (const cert of dta.certifications) bullet([cert.name, cert.issuer, cert.date].filter(Boolean).join(' — '));
+  }
+
+  docxSave(new d.Document({ sections: [{ properties: { page: { margin: { top: 820, bottom: 820, left: 900, right: 900 } } }, children: ch }] }),
+    'Optimized-Resume-Classic.docx');
+}
+
+/* ── TEMPLATE 3 DOCX — Minimal Modern ── */
+function minimalResumeDocx(dta) {
+  const d = window.docx, TAB = d.TabStopPosition.MAX;
+  const ch = [];
+  const c = dta.contact || {};
+  ch.push(new d.Paragraph({
+    alignment: d.AlignmentType.CENTER,
+    children: [new d.TextRun({ text: dta.name || '', bold: true, size: 34, color: '283446', font: 'Calibri' })]
+  }));
+  const ct = [c.location, c.email, c.phone, c.linkedin].filter(v => v && String(v).trim()).join('   \u2022   ');
+  if (ct) ch.push(new d.Paragraph({
+    alignment: d.AlignmentType.CENTER, spacing: { after: 220 },
+    children: [new d.TextRun({ text: ct, size: 15, color: '828282', font: 'Calibri' })]
+  }));
+
+  const head = t => ch.push(new d.Paragraph({
+    spacing: { before: 240, after: 100 },
+    border: { bottom: { color: 'C8C8C8', size: 4, style: d.BorderStyle.SINGLE } },
+    children: [new d.TextRun({ text: t.toUpperCase(), bold: true, size: 18, color: '5A5A5A', font: 'Calibri' })]
+  }));
+  const bullet = t => ch.push(new d.Paragraph({
+    bullet: { level: 0 }, spacing: { after: 40 },
+    children: [new d.TextRun({ text: t, size: 17, color: '3C3C3C', font: 'Calibri' })]
+  }));
+
+  if (dta.summary) {
+    head('Professional Summary');
+    ch.push(new d.Paragraph({ children: [new d.TextRun({ text: dta.summary, size: 17, color: '3C3C3C', font: 'Calibri' })] }));
+  }
+
+  if ((dta.experience || []).length) {
+    head('Work Experience');
+    for (const j of dta.experience) {
+      ch.push(new d.Paragraph({
+        tabStops: [{ type: d.TabStopType.RIGHT, position: TAB }], spacing: { before: 120 },
+        children: [new d.TextRun({ text: j.title || '', bold: true, size: 20, color: '283446', font: 'Calibri' }),
+        new d.TextRun({ text: '\t' + [j.dates, j.location].filter(Boolean).join('  '), bold: true, size: 15, color: '283446', font: 'Calibri' })]
+      }));
+      ch.push(new d.Paragraph({ spacing: { after: 60 }, children: [new d.TextRun({ text: j.company || '', size: 17, color: '3C3C3C', font: 'Calibri' })] }));
+      for (const b of j.bullets || []) bullet(b);
+    }
+  }
+
+  if ((dta.projects || []).length) {
+    head('Projects');
+    for (const p of dta.projects) {
+      ch.push(new d.Paragraph({ children: [new d.TextRun({ text: p.name || '', bold: true, size: 20, color: '283446', font: 'Calibri' })] }));
+      if (p.description) ch.push(new d.Paragraph({ spacing: { after: 40 }, children: [new d.TextRun({ text: p.description, size: 17, color: '3C3C3C', font: 'Calibri' })] }));
+      for (const b of p.bullets || []) bullet(b);
+    }
+  }
+
+  if ((dta.education || []).length) {
+    head('Education');
+    for (const e of dta.education) {
+      ch.push(new d.Paragraph({
+        tabStops: [{ type: d.TabStopType.RIGHT, position: TAB }],
+        children: [new d.TextRun({ text: e.degree || '', bold: true, size: 20, color: '283446', font: 'Calibri' }),
+        new d.TextRun({ text: '\t' + [e.dates, e.note].filter(Boolean).join('  '), size: 15, color: '283446', font: 'Calibri' })]
+      }));
+      ch.push(new d.Paragraph({ spacing: { after: 80 }, children: [new d.TextRun({ text: e.school || '', size: 17, color: '3C3C3C', font: 'Calibri' })] }));
+    }
+  }
+
+  const soft = dta.softSkills || [], hard = dta.hardSkills || [];
+  if (soft.length || hard.length) {
+    head('Skills');
+    if (hard.length) ch.push(new d.Paragraph({
+      spacing: { after: 60 },
+      children: [new d.TextRun({ text: 'Technical: ', bold: true, size: 17, font: 'Calibri' }),
+      new d.TextRun({ text: hard.join(', '), size: 17, color: '3C3C3C', font: 'Calibri' })]
+    }));
+    if (soft.length) ch.push(new d.Paragraph({
+      spacing: { after: 60 },
+      children: [new d.TextRun({ text: 'Soft: ', bold: true, size: 17, font: 'Calibri' }),
+      new d.TextRun({ text: soft.join(', '), size: 17, color: '3C3C3C', font: 'Calibri' })]
+    }));
+  }
+
+  if ((dta.certifications || []).length) {
+    head('Certifications');
+    for (const cert of dta.certifications) bullet([cert.name, cert.issuer, cert.date].filter(Boolean).join(' \u2022 '));
+  }
+
+  docxSave(new d.Document({ sections: [{ properties: { page: { margin: { top: 900, bottom: 900, left: 1000, right: 1000 } } }, children: ch }] }),
+    'Optimized-Resume-Minimal.docx');
+}
+
 /* ══════════════════════════════════════════════════════════════
    TEMPLATE 1 — CLASSIC ATS
    Centered huge name, centered contact, bold underlined headings
@@ -1154,7 +1273,7 @@ function minimalResumePdf(d) {
   }
 
   if ((d.experience || []).length) {
-    head('Professional Experience');
+    head('Work Experience');
     for (const j of d.experience) {
       pageBreak(34);
       doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...SLATE);
@@ -1202,7 +1321,7 @@ function minimalResumePdf(d) {
 
   const soft = d.softSkills || [], hard = d.hardSkills || [];
   if (soft.length || hard.length) {
-    head('Expert-Level Skills');
+    head('Skills');
     doc.setFontSize(8.5); doc.setTextColor(...TEXT);
     if (hard.length) {
       pageBreak(12);
@@ -1305,7 +1424,7 @@ function styledResumePdf(d) {
 
   /* EXPERIENCE */
   if ((d.experience || []).length) {
-    head('EXPERIENCE');
+    head('WORK EXPERIENCE');
     for (const j of d.experience) {
       pageBreak(52);
       doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(25, 25, 25);
@@ -1361,7 +1480,7 @@ function styledResumePdf(d) {
 
   /* PROJECTS */
   if ((d.projects || []).length) {
-    head('GRADUATION PROJECT');
+    head('PROJECTS');
     for (const p of d.projects) {
       pageBreak(40);
       doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(25, 25, 25);
@@ -1378,7 +1497,7 @@ function styledResumePdf(d) {
 
   /* CERTIFICATES */
   if ((d.certifications || []).length) {
-    head('CERTIFICATE & COURSES');
+    head('CERTIFICATIONS');
     for (const cert of d.certifications) {
       pageBreak(26);
       doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(25, 25, 25);
@@ -1502,7 +1621,7 @@ async function styledResumeDocx(dta) {
 
   // Experience
   if ((dta.experience || []).length) {
-    head('EXPERIENCE');
+    head('WORK EXPERIENCE');
     for (const j of dta.experience) {
       ch.push(new d.Paragraph({ spacing: { before: 120 }, children: [new d.TextRun({ text: j.title || '', bold: true, size: 22, font: 'Calibri' })] }));
       ch.push(new d.Paragraph({ children: [new d.TextRun({ text: j.company || '', size: 20, font: 'Calibri' })] }));
@@ -1542,7 +1661,7 @@ async function styledResumeDocx(dta) {
 
   // Projects
   if ((dta.projects || []).length) {
-    head('GRADUATION PROJECT');
+    head('PROJECTS');
     for (const p of dta.projects) {
       ch.push(new d.Paragraph({ children: [new d.TextRun({ text: p.name || '', bold: true, size: 22, font: 'Calibri' })] }));
       if (p.description) ch.push(new d.Paragraph({ spacing: { after: 60 }, children: [new d.TextRun({ text: p.description, size: 18, font: 'Calibri' })] }));
@@ -1552,7 +1671,7 @@ async function styledResumeDocx(dta) {
 
   // Certifications
   if ((dta.certifications || []).length) {
-    head('CERTIFICATE & COURSES');
+    head('CERTIFICATIONS');
     for (const cert of dta.certifications) {
       ch.push(new d.Paragraph({ children: [new d.TextRun({ text: cert.name || '', bold: true, size: 20, font: 'Calibri' })] }));
       ch.push(new d.Paragraph({ spacing: { after: 80 }, children: [new d.TextRun({ text: [cert.issuer, cert.date].filter(Boolean).join(', '), size: 16, color: GRAY, font: 'Calibri' })] }));
@@ -1582,8 +1701,6 @@ function init() {
   updateIndicators();
 
   $('navBrand').addEventListener('click', restart);
-  $('langBtn').addEventListener('click', toggleLang);
-  $('navCtaBtn').addEventListener('click', showApp);
   $('heroCtaBtn').addEventListener('click', showApp);
   $('ctaBandBtn').addEventListener('click', showApp);
   $('restartBtn').addEventListener('click', restart);
