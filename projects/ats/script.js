@@ -696,6 +696,16 @@ RULES:
 - Integrate job description keywords naturally into summary and bullets.
 - Never fabricate anything not in the original resume.
 
+TARGETED KEYWORD INTEGRATION:
+The ATS analysis found these keywords missing from the original resume:
+${(analysis?.missingKeywords || []).concat(analysis?.missingSkills || []).join(', ') || 'none identified'}
+
+For EACH missing keyword above, apply this decision process:
+1. Does the candidate's actual experience genuinely cover this keyword (even under different wording)? → Rewrite the relevant bullet/skill using the EXACT keyword phrasing from the job description.
+   Examples of legitimate rephrasing: "fixed network problems" → "Network Troubleshooting"; "checked data packets" → "Traffic Analysis and Packet Capture"; "managed antivirus" → relevant security terminology.
+2. Is it adjacent to their real experience? → Mention it truthfully in context (e.g., "monitored firewall-protected environments" is honest if they worked in one — but never claim they configured firewalls if they did not).
+3. Do they genuinely lack it? → SKIP it entirely and list it in "suggestions" instead. NEVER fabricate.
+
 ORIGINAL RESUME:
 ${resumeText}
 
@@ -1695,24 +1705,31 @@ function showErr(id, msg) { const e = $(id); if (e) { e.textContent = msg; e.cla
 /* ════════════════════════════════════════════════════════════════
    INIT
    ════════════════════════════════════════════════════════════════ */
+/* Safe listener helper — page never breaks if an element is missing */
+function on(id, ev, fn) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener(ev, fn);
+  else console.warn('Element not found:', id);
+}
+
 function init() {
-  renderLanding();
-  renderAppText();
-  updateIndicators();
+  try { renderLanding(); } catch (e) { console.error('renderLanding:', e); }
+  try { renderAppText(); } catch (e) { console.error('renderAppText:', e); }
+  try { updateIndicators(); } catch (e) { }
 
-  $('navBrand').addEventListener('click', restart);
-  $('heroCtaBtn').addEventListener('click', showApp);
-  $('ctaBandBtn').addEventListener('click', showApp);
-  $('restartBtn').addEventListener('click', restart);
+  on('navBrand', 'click', restart);
+  on('heroCtaBtn', 'click', showApp);
+  on('ctaBandBtn', 'click', showApp);
+  on('restartBtn', 'click', restart);
 
-  $('tabsBar').addEventListener('click', e => {
+  on('tabsBar', 'click', e => {
     const b = e.target.closest('.tab-btn');
     if (b) renderTab(parseInt(b.dataset.tab));
   });
-  $('genAllBtn').addEventListener('click', generateAll);
+  on('genAllBtn', 'click', generateAll);
 
-  initStep1();
-  initStep2();
+  try { initStep1(); } catch (e) { console.error('initStep1:', e); }
+  try { initStep2(); } catch (e) { console.error('initStep2:', e); }
 }
 
 document.addEventListener('DOMContentLoaded', init);
