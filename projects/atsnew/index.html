@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="htmlRoot">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ATS Resume Optimizer</title>
+  <meta name="description"
+    content="Professional ATS resume optimizer. Upload your resume, match it to any job description, and get an optimized version in seconds." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="icon" href="/img/logo_hello.png">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Background Lines -->
+  <div class="background-lines">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <!-- ═══════════════════════════ NAVBAR ═══════════════════════════════════════ -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <div class="nav-brand" id="navBrand">
+        <div class="brand-icon">✦</div>
+        <span id="brandName">ATS Optimizer</span>
+      </div>
+      <div class="nav-right">
+        <a href="mailto:support@mfag.sa" class="btn-ghost">support@mfag.sa</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════ LANDING ══════════════════════════════════════ -->
+  <div id="landingPage">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-wrap">
+        <span class="badge" id="heroBadge">Professional ATS Optimization</span>
+        <h1 class="hero-h1 hero-h1-sm" id="heroSub">Upload your resume and job description. Get an <span
+            class="gradient-text">optimized resume</span>, tailored cover letter, and interview prep — all in seconds.
+        </h1>
+        <button class="btn-primary btn-lg" id="heroCtaBtn">Upload Your Resume →</button>
+        <p class="hero-fine" id="heroFine">No signup required. 100% free to use.</p>
+        <div class="stats-row">
+          <div class="stat-item"><span class="stat-num">94%</span><span class="stat-lbl" id="st0">ATS Pass Rate</span>
+          </div>
+          <div class="stat-sep"></div>
+          <div class="stat-item"><span class="stat-num">3×</span><span class="stat-lbl" id="st1">More Interviews</span>
+          </div>
+          <div class="stat-sep"></div>
+          <div class="stat-item"><span class="stat-num">60s</span><span class="stat-lbl" id="st2">Average Time</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="badge" id="howBadge">How It Works</span>
+          <p class="section-sub" id="howSub">Four steps from upload to interview-ready</p>
+        </div>
+        <div class="how-grid" id="howGrid"></div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section alt-section">
+      <div class="container">
+        <div class="section-head">
+          <h2 class="section-h2" id="featTitle">Everything You Need to Get Hired</h2>
+        </div>
+        <div class="feat-grid" id="featGrid"></div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section">
+      <div class="container container-sm">
+        <div class="section-head">
+          <h2 class="section-h2" id="faqTitle">Frequently Asked Questions</h2>
+        </div>
+        <div class="card faq-card" id="faqList"></div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="container footer-inner">
+        <div class="footer-brand"><span class="teal">✦</span> <span id="footerBrand">ATS Optimizer</span></div>
+        <p>Support: <a href="mailto:support@mfag.sa">support@mfag.sa</a></p>
+        <p style="margin-top:4px">Developed by <strong style="color:#e6a560">Mishary Alghamdi</strong></p>
+      </div>
+    </footer>
+
+  </div><!-- /landingPage -->
+
+  <!-- ═══════════════════════════ APP WIZARD ════════════════════════════════════ -->
+  <div id="appWizard" class="hidden">
+    <div class="container container-md">
+
+      <!-- App Header -->
+      <div class="app-header">
+        <div>
+          <span class="badge" id="appBadge">ATS Optimizer</span>
+          <h1 class="app-title" id="appTitle">Optimize Your Resume</h1>
+        </div>
+        <button class="btn-secondary btn-sm" id="restartBtn">← Start Over</button>
+      </div>
+
+      <!-- Global Error -->
+      <div class="global-error hidden" id="globalError"></div>
+
+      <!-- Step Indicators -->
+      <div class="step-indicators">
+        <div class="step-ind">
+          <div class="step-num active" id="sn1">1</div><span class="step-lbl active" id="sl1">Upload Resume</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-ind">
+          <div class="step-num" id="sn2">2</div><span class="step-lbl" id="sl2">Job Description</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-ind">
+          <div class="step-num" id="sn3">3</div><span class="step-lbl" id="sl3">Analysis</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-ind">
+          <div class="step-num" id="sn4">4</div><span class="step-lbl" id="sl4">Results</span>
+        </div>
+      </div>
+
+      <!-- ── STEP 1 ─────────────────────────────────────────────────────────── -->
+      <div id="step1" class="card wizard-step fade-in">
+        <h2 class="step-title" id="s1Title">Upload Resume</h2>
+        <p class="step-sub" id="s1Sub">Supports PDF and DOCX</p>
+        <div class="drop-zone" id="resumeDZ" tabindex="0" role="button">
+          <div id="dzEmpty">
+            <div class="dz-icon">📤</div>
+            <p class="dz-main" id="s1DragTxt">Drag &amp; drop your resume here</p>
+            <p class="dz-or" id="s1OrTxt">or</p>
+            <button class="btn-secondary btn-sm" id="s1BrowseBtn">Browse Files</button>
+            <p class="dz-hint" id="s1Hint">PDF or DOCX accepted</p>
+          </div>
+          <div id="dzFilled" class="hidden">
+            <div class="dz-icon">📄</div>
+            <p class="dz-filename" id="rFileName"></p>
+            <p class="dz-filesize" id="rFileSize"></p>
+            <button class="btn-ghost-sm" id="rClearBtn">✕ Remove</button>
+          </div>
+        </div>
+        <input type="file" id="resumeInput" accept=".pdf,.docx,.doc" class="hidden" />
+        <p class="err-msg hidden" id="s1Err"></p>
+        <div class="step-foot right">
+          <button class="btn-primary" id="s1NextBtn">Continue →</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 2 ─────────────────────────────────────────────────────────── -->
+      <div id="step2" class="card wizard-step hidden">
+        <h2 class="step-title" id="s2Title">Job Description</h2>
+        <p class="step-sub" id="s2Sub">Paste the text or upload a file.</p>
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="modePaste">📋 Paste Text</button>
+          <button class="mode-btn" id="modeUpload">📁 Upload File</button>
+        </div>
+        <div id="jdPasteWrap">
+          <textarea id="jdTA" class="textarea" rows="11"
+            placeholder="Paste the full job description here..."></textarea>
+        </div>
+        <div id="jdUploadWrap" class="hidden">
+          <div class="drop-zone" id="jdDZ" tabindex="0" role="button" style="padding:32px">
+            <div id="jdDZEmpty">
+              <div class="dz-icon">📋</div>
+              <p class="dz-main" id="s2UploadTxt">Click or drag to upload JD file</p>
+              <p class="dz-hint">PDF · DOCX · TXT</p>
+            </div>
+            <div id="jdDZFilled" class="hidden">
+              <div class="dz-icon">📋</div>
+              <p class="dz-filename" id="jdFileName"></p>
+            </div>
+          </div>
+          <input type="file" id="jdInput" accept=".pdf,.docx,.doc,.txt" class="hidden" />
+          <p class="extract-ok hidden" id="jdExtractOk"></p>
+        </div>
+        <p class="err-msg hidden" id="s2Err"></p>
+        <div class="step-foot space-between">
+          <button class="btn-secondary" id="s2BackBtn">← Back</button>
+          <button class="btn-primary" id="s2NextBtn">Analyze Resume</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 3 ─────────────────────────────────────────────────────────── -->
+      <div id="step3" class="card wizard-step hidden">
+        <div class="loading-center">
+          <div class="load-emoji">🤖</div>
+          <h2 id="s3Title">Analyzing your resume…</h2>
+          <p class="step-sub" id="s3Sub">Comparing your resume against the job requirements.</p>
+          <div class="spinner-lg"></div>
+          <p class="load-tip" id="s3Tip">Usually takes 15–30 seconds</p>
+        </div>
+      </div>
+
+      <!-- ── STEP 4 ─────────────────────────────────────────────────────────── -->
+      <div id="step4" class="wizard-step hidden">
+
+        <!-- Score Card -->
+        <div class="card results-card">
+          <h2 class="card-title" id="s4ScoreTitle">ATS Match Score</h2>
+          <div class="score-layout">
+            <div class="ring-wrap">
+              <svg id="scoreRing" viewBox="0 0 160 160" width="160" height="160" aria-label="ATS score">
+                <circle cx="80" cy="80" r="65" fill="none" stroke="#1f1f1f" stroke-width="12" />
+                <circle id="ringArc" cx="80" cy="80" r="65" fill="none" stroke="#e6a560" stroke-width="12"
+                  stroke-dasharray="0 408.41" stroke-linecap="round" transform="rotate(-90 80 80)" />
+                <text id="ringPct" x="80" y="74" text-anchor="middle" font-size="30" font-weight="900" fill="#e6a560"
+                  font-family="Inter,system-ui">0%</text>
+                <text id="ringLbl" x="80" y="97" text-anchor="middle" font-size="10" fill="#8a8a8a"
+                  font-family="Inter,system-ui">ATS Score</text>
+              </svg>
+            </div>
+            <div class="prog-col">
+              <div class="prog-row">
+                <div class="prog-labels"><span id="pLblSkills">Skills Match</span><span class="prog-pct"
+                    id="pPctSkills">0%</span></div>
+                <div class="prog-track">
+                  <div class="prog-fill" id="pFillSkills" style="width:0%"></div>
+                </div>
+              </div>
+              <div class="prog-row">
+                <div class="prog-labels"><span id="pLblExp">Experience Match</span><span class="prog-pct"
+                    id="pPctExp">0%</span></div>
+                <div class="prog-track">
+                  <div class="prog-fill" id="pFillExp" style="width:0%"></div>
+                </div>
+              </div>
+              <div class="prog-row">
+                <div class="prog-labels"><span id="pLblEdu">Education Match</span><span class="prog-pct"
+                    id="pPctEdu">0%</span></div>
+                <div class="prog-track">
+                  <div class="prog-fill" id="pFillEdu" style="width:0%"></div>
+                </div>
+              </div>
+              <div class="prog-row">
+                <div class="prog-labels"><span id="pLblKw">Keywords Match</span><span class="prog-pct"
+                    id="pPctKw">0%</span></div>
+                <div class="prog-track">
+                  <div class="prog-fill" id="pFillKw" style="width:0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="summaryBox" class="summary-note hidden"></div>
+        </div>
+
+        <!-- Gaps & Strengths -->
+        <div class="two-col">
+          <div class="card gap-card">
+            <h3 id="missingTitle"><span class="warn">⚠</span> Missing Keywords</h3>
+            <div id="missingKwWrap" class="tags-wrap"></div>
+            <div id="missingSkillsWrap" class="hidden">
+              <p class="sec-lbl" id="misSkillsLbl">Missing Skills:</p>
+              <div id="missingSkillsTags" class="tags-wrap"></div>
+            </div>
+          </div>
+          <div class="card gap-card">
+            <h3 id="strengthsTitle"><span class="teal">✓</span> Your Strengths</h3>
+            <div id="strengthsTags" class="tags-wrap"></div>
+            <div id="suggestionsWrap" class="hidden">
+              <p class="sec-lbl" id="sugLbl">Suggestions:</p>
+              <div id="sugList"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output Tabs -->
+        <div class="card tabs-card">
+          <div class="tabs-bar" id="tabsBar" role="tablist">
+            <button class="tab-btn active" data-tab="0" id="tab0">✏️ <span id="tl0">Optimized Resume</span></button>
+            <button class="tab-btn" data-tab="1" id="tab1">📝 <span id="tl1">Cover Letter</span></button>
+            <button class="tab-btn" data-tab="2" id="tab2">🎤 <span id="tl2">Interview Prep</span></button>
+          </div>
+          <div id="tabContent"></div>
+        </div>
+
+        <!-- Interview Call -->
+        <div class="card call-card">
+          <div class="call-card-info">
+            <h3>🎙️ Live Mock Interview</h3>
+            <p>Practice with a voice interviewer. It asks questions based on your resume and this job, listens to your spoken answers, and gives you a performance report.</p>
+            <p class="call-hint">Requires Chrome or Edge · Microphone · English</p>
+          </div>
+          <button class="btn-primary" id="startCallBtn">Prepare Interview Call</button>
+        </div>
+
+        <!-- Generate All -->
+        <div id="genAllWrap" class="gen-all">
+          <button class="btn-primary btn-lg" id="genAllBtn">⚡ Generate Everything</button>
+        </div>
+
+      </div><!-- /step4 -->
+    </div>
+  </div><!-- /appWizard -->
+
+  <!-- ═══════════ INTERVIEW CALL OVERLAY ═══════════ -->
+  <div id="callOverlay" class="call-overlay hidden">
+    <div class="call-box">
+
+      <div id="callLive">
+        <div class="call-avatar" id="callAvatar">
+          <div class="call-avatar-ring"></div>
+          <div class="call-avatar-core">👤</div>
+        </div>
+        <p class="call-status" id="callStatus">Connecting…</p>
+        <button class="btn-secondary btn-sm hidden" id="callMicBtn">🎤 Tap to answer</button>
+        <div class="call-transcript" id="callTranscript"></div>
+        <button class="btn-end-call" id="endCallBtn">✕ End Call</button>
+      </div>
+
+      <div id="callReport" class="hidden">
+        <h3 class="call-report-title">Interview Performance Report</h3>
+        <div class="call-report-text" id="callReportText"></div>
+        <button class="btn-primary" id="closeCallBtn">Close</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+  <script src="script.js?v=7"></script>
+</body>
+
+</html>
