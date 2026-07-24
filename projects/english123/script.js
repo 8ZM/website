@@ -13,8 +13,8 @@
    │    Put your gsk_ key in GROQ_API_KEY, leave the proxy empty.  │
    └──────────────────────────────────────────────────────────────┘ */
 
-const API_PROXY_URL = '';   // e.g. 'https://groq-proxy.yourname.workers.dev'
-const GROQ_API_KEY  = '';   // local testing only — never commit a real key
+const API_PROXY_URL = 'https://groq-proxy.mishary-fgh.workers.dev/';   // e.g. 'https://groq-proxy.yourname.workers.dev'
+const GROQ_API_KEY = '';   // local testing only — never commit a real key
 
 /* ════════════════════════════════════════════════════════════════
    GROQ API
@@ -122,7 +122,7 @@ function parseJSON(raw) {
 /* ════════════════════════════════════════════════════════════════
    HELPERS
    ════════════════════════════════════════════════════════════════ */
-const $  = id => document.getElementById(id);
+const $ = id => document.getElementById(id);
 const tx = (id, v) => { const e = $(id); if (e) e.textContent = v; };
 const sh = id => { const e = $(id); if (e) e.classList.remove('hidden'); };
 const hi = id => { const e = $(id); if (e) e.classList.add('hidden'); };
@@ -168,7 +168,7 @@ function voiceSupported() {
 function pickVoice() {
   const v = speechSynthesis.getVoices();
   return v.find(x => /en[-_]US/i.test(x.lang) && /Google|Microsoft|Samantha/i.test(x.name))
-      || v.find(x => /^en/i.test(x.lang)) || v[0] || null;
+    || v.find(x => /^en/i.test(x.lang)) || v[0] || null;
 }
 if ('speechSynthesis' in window) {
   speechSynthesis.onvoiceschanged = () => { ttsVoice = pickVoice(); };
@@ -219,7 +219,7 @@ function listenOnce() {
       clearTimeout(silenceTimer);
       stopAnswering = null;
       hi('speakDoneBtn'); hi('pauseHint'); hi('liveSay');
-      try { recognition.onend = null; recognition.stop(); } catch {}
+      try { recognition.onend = null; recognition.stop(); } catch { }
       resolve(finalText.trim() || null);
     };
 
@@ -430,7 +430,7 @@ Rules: judge only what they said. "fixes" holds at most 3 items and is empty whe
 function endSpeaking() {
   speakActive = false;
   if (stopAnswering) stopAnswering();
-  try { if (recognition) { recognition.onend = null; recognition.stop(); } } catch {}
+  try { if (recognition) { recognition.onend = null; recognition.stop(); } } catch { }
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   hi('speakLive'); sh('speakSetup');
 }
@@ -713,8 +713,8 @@ function finishQuiz() {
   tx('quizFinalScore', `${qCorrect} / ${questions.length}`);
   tx('quizFinalNote',
     pct >= 85 ? 'Excellent work. Try the next level up.' :
-    pct >= 60 ? 'Solid. Read the explanations you missed and go again.' :
-                'Keep going — the explanations are where the learning happens.');
+      pct >= 60 ? 'Solid. Read the explanations you missed and go again.' :
+        'Keep going — the explanations are where the learning happens.');
 }
 
 /* ════════════════════════════════════════════════════════════════
