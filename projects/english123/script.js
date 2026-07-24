@@ -13,8 +13,8 @@
    │    Put your gsk_ key in GROQ_API_KEY, leave the proxy empty.  │
    └──────────────────────────────────────────────────────────────┘ */
 
-const API_PROXY_URL = 'https://groq-proxy.mishary-fgh.workers.dev/';   // e.g. 'https://groq-proxy.yourname.workers.dev'
-const GROQ_API_KEY = '';   // local testing only — never commit a real key
+const API_PROXY_URL = '';   // e.g. 'https://groq-proxy.yourname.workers.dev'
+const GROQ_API_KEY  = '';   // local testing only — never commit a real key
 
 /* ════════════════════════════════════════════════════════════════
    GROQ API
@@ -71,16 +71,36 @@ async function aiChat(system, messages, maxTok = 900) {
 
 const ask = (system, user, maxTok) => aiChat(system, [{ role: 'user', content: user }], maxTok);
 
-/* Parses JSON even when the model truncates or wraps it */
+/* Escapes raw newlines/tabs that models emit inside JSON string values */
+function escapeControlChars(s) {
+  let out = '', inStr = false, esc = false;
+  for (const ch of s) {
+    if (esc) { out += ch; esc = false; continue; }
+    if (ch === '\\') { out += ch; esc = true; continue; }
+    if (ch === '"') { inStr = !inStr; out += ch; continue; }
+    if (inStr) {
+      if (ch === '\n') { out += '\\n'; continue; }
+      if (ch === '\r') { out += '\\r'; continue; }
+      if (ch === '\t') { out += '\\t'; continue; }
+      if (ch.charCodeAt(0) < 0x20) continue;   // drop other control chars
+    }
+    out += ch;
+  }
+  return out;
+}
+
+/* Parses JSON even when the model truncates it or wraps it in prose */
 function parseJSON(raw) {
   let s = raw.replace(/```json|```/g, '').trim();
   const start = s.search(/[{[]/);
   if (start === -1) throw new Error('No JSON in response');
-  s = s.slice(start);
+  s = escapeControlChars(s.slice(start));
+
   const lastClose = Math.max(s.lastIndexOf('}'), s.lastIndexOf(']'));
   if (lastClose !== -1) {
-    try { return JSON.parse(s.slice(0, lastClose + 1)); } catch { /* fall through */ }
+    try { return JSON.parse(s.slice(0, lastClose + 1)); } catch { /* try repair below */ }
   }
+
   // Track open brackets on a stack so they close in the right order
   let inStr = false, esc = false;
   const stack = [];
@@ -102,7 +122,7 @@ function parseJSON(raw) {
 /* ════════════════════════════════════════════════════════════════
    HELPERS
    ════════════════════════════════════════════════════════════════ */
-const $ = id => document.getElementById(id);
+const $  = id => document.getElementById(id);
 const tx = (id, v) => { const e = $(id); if (e) e.textContent = v; };
 const sh = id => { const e = $(id); if (e) e.classList.remove('hidden'); };
 const hi = id => { const e = $(id); if (e) e.classList.add('hidden'); };
@@ -148,7 +168,7 @@ function voiceSupported() {
 function pickVoice() {
   const v = speechSynthesis.getVoices();
   return v.find(x => /en[-_]US/i.test(x.lang) && /Google|Microsoft|Samantha/i.test(x.name))
-    || v.find(x => /^en/i.test(x.lang)) || v[0] || null;
+      || v.find(x => /^en/i.test(x.lang)) || v[0] || null;
 }
 if ('speechSynthesis' in window) {
   speechSynthesis.onvoiceschanged = () => { ttsVoice = pickVoice(); };
@@ -169,19 +189,85 @@ function speak(text) {
   });
 }
 
+let pauseMs = 8000;          // silence before an answer is accepted; 0 = wait for the Done button
+let stopAnswering = null;     // set while listening, called by the Done button
+
 function listenOnce() {
   return new Promise(resolve => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SR();
     recognition.lang = 'en-US';
-    recognition.interimResults = false;
-    recognition.continuous = false;
+    recognition.continuous = true;      // keep the mic open through pauses
+    recognition.interimResults = true;  // so we can tell speech from silence
     recognition.maxAlternatives = 1;
-    let got = false;
-    recognition.onresult = e => { got = true; resolve(e.results[0][0].transcript); };
-    recognition.onerror = () => { if (!got) resolve(null); };
-    recognition.onend = () => { if (!got) resolve(null); };
-    try { recognition.start(); } catch { resolve(null); }
+
+    let finalText = '';
+    let silenceTimer = null;
+    let hasSpoken = false;
+    let settled = false;
+
+    const showLive = t => {
+      const box = $('liveSay');
+      if (!box) return;
+      if (t.trim()) { box.classList.remove('hidden'); tx('liveSayText', t); }
+      else box.classList.add('hidden');
+    };
+
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(silenceTimer);
+      stopAnswering = null;
+      hi('speakDoneBtn'); hi('pauseHint'); hi('liveSay');
+      try { recognition.onend = null; recognition.stop(); } catch {}
+      resolve(finalText.trim() || null);
+    };
+
+    // Restart the countdown every time new speech arrives
+    const resetSilence = () => {
+      clearTimeout(silenceTimer);
+      if (!hasSpoken || pauseMs === 0) return;   // never auto-cut before they speak
+      silenceTimer = setTimeout(finish, pauseMs);
+    };
+
+    recognition.onresult = e => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (r.isFinal) finalText += r[0].transcript + ' ';
+        else interim += r[0].transcript;
+      }
+      if ((finalText + interim).trim()) {
+        hasSpoken = true;
+        showLive(finalText + interim);
+      }
+      resetSilence();
+    };
+
+    // Silence is not an error here — just keep waiting
+    recognition.onerror = e => {
+      if (e.error === 'no-speech' || e.error === 'aborted') return;
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') finish();
+    };
+
+    // Chrome ends the session on its own after a pause — restart it
+    recognition.onend = () => {
+      if (settled) return;
+      try { recognition.start(); }
+      catch { setTimeout(() => { if (!settled) try { recognition.start(); } catch { finish(); } }, 250); }
+    };
+
+    stopAnswering = finish;
+    sh('speakDoneBtn');
+    const hint = $('pauseHint');
+    if (hint) {
+      hint.textContent = pauseMs === 0
+        ? 'Take all the time you need — tap Done when you finish.'
+        : `Take your time. It waits ${pauseMs / 1000} seconds after you stop talking.`;
+      hint.classList.remove('hidden');
+    }
+
+    try { recognition.start(); } catch { finish(); }
   });
 }
 
@@ -296,12 +382,14 @@ async function partnerSays(text) {
 async function hearLearner() {
   if (!speakActive) return;
   hi('speakMicBtn');
-  setOrb('Listening — speak now', 'listening');
+  setOrb('Listening — take your time', 'listening');
   const said = await listenOnce();
   if (!speakActive) return;
 
+  hi('speakDoneBtn'); hi('pauseHint'); hi('liveSay');
+
   if (!said) {
-    setOrb('Did not catch that', '');
+    setOrb('Nothing heard — tap to try again', '');
     sh('speakMicBtn');
     return;
   }
@@ -341,7 +429,8 @@ Rules: judge only what they said. "fixes" holds at most 3 items and is empty whe
 
 function endSpeaking() {
   speakActive = false;
-  try { recognition && recognition.stop(); } catch { }
+  if (stopAnswering) stopAnswering();
+  try { if (recognition) { recognition.onend = null; recognition.stop(); } } catch {}
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   hi('speakLive'); sh('speakSetup');
 }
@@ -453,7 +542,8 @@ Include up to 8 errors, most important first. Be encouraging but accurate.`,
       </div>` : ''}
     `;
     sh('writeReport');
-    $('writeReport').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const y = $('writeReport').getBoundingClientRect().top + window.scrollY - 78;
+    window.scrollTo({ top: y, behavior: 'smooth' });
   } catch (err) {
     showError(err.message);
   }
@@ -476,34 +566,94 @@ async function startQuiz(mode) {
   tx('quizTitle', mode === 'grammar' ? 'Grammar' : 'Vocabulary');
   showView('quizView');
   sh('quizLoading'); hi('quizBody'); hi('quizDone');
+  tx('quizLoading', 'Writing your questions…');
   tx('quizCount', `0 / ${QUIZ_LEN}`);
   tx('quizScore', '0 correct');
   $('quizProgress').style.width = '0%';
 
-  const system = mode === 'grammar'
-    ? `You write English grammar practice questions. Return ONLY a JSON array, no markdown.`
-    : `You write English vocabulary-in-context questions. Return ONLY a JSON array, no markdown.`;
+  const system = `You write English practice questions. Return ONLY a JSON array. No markdown, no commentary.`;
 
-  const user = mode === 'grammar'
-    ? `Write ${QUIZ_LEN} multiple-choice grammar questions for a ${level} learner.
-Format: [{"prompt":"<sentence with a blank shown as ___ , or a short grammar question>","options":["a","b","c","d"],"answer":<0-3>,"explain":"<why the answer is right, max 22 words>"}]
-Cover a mix of tenses, prepositions, articles, conditionals, and word order. Exactly 4 options each. Make the wrong options plausible.`
-    : `Write ${QUIZ_LEN} vocabulary questions for a ${level} learner.
-Format: [{"prompt":"<a natural sentence with one word replaced by ___>","options":["a","b","c","d"],"answer":<0-3>,"explain":"<what the correct word means and why it fits, max 22 words>"}]
-Each question gives one sentence with a single gap and 4 word choices. The wrong options must be real words that almost fit. Use useful everyday and workplace vocabulary.`;
+  // Worked examples — never placeholder letters, or the model copies them verbatim
+  const grammarUser = `Write ${QUIZ_LEN} multiple-choice grammar questions for a ${level} English learner.
 
-  try {
-    const raw = await ask(system, user, 2600);
-    const arr = parseJSON(raw);
-    questions = (Array.isArray(arr) ? arr : []).filter(q =>
-      q && q.prompt && Array.isArray(q.options) && q.options.length === 4 && typeof q.answer === 'number');
-    if (!questions.length) throw new Error('Could not build questions. Try again.');
-    hi('quizLoading'); sh('quizBody');
-    renderQuestion();
-  } catch (err) {
-    tx('quizLoading', err.message);
-    showError(err.message);
+Return exactly this shape, with REAL words in every field:
+[
+  {"prompt":"By the time I arrived, they had already ___ the party.","options":["leave","left","leaving","leaves"],"answer":1,"explain":"After 'had' we use the past participle, so 'left' is correct."},
+  {"prompt":"She has been working here ___ 2019.","options":["for","since","from","during"],"answer":1,"explain":"'Since' marks a starting point in time; 'for' marks a length of time."}
+]
+
+Rules:
+- Every option must be a real word or phrase that could plausibly fill the gap. NEVER output single letters such as "a", "b", "c", "d" as options.
+- Exactly 4 different options per question. Only one is correct.
+- "answer" is the index (0-3) of the correct option.
+- Mark the gap with three underscores: ___
+- Cover a mix of tenses, prepositions, articles, conditionals, and word order.
+- Do not repeat the two example questions above.`;
+
+  const vocabUser = `Write ${QUIZ_LEN} vocabulary-in-context questions for a ${level} English learner.
+
+Return exactly this shape, with REAL words in every field:
+[
+  {"prompt":"The manager asked me to ___ the report before Friday's meeting.","options":["submit","admit","permit","commit"],"answer":0,"explain":"'Submit' means to hand something in officially."},
+  {"prompt":"Traffic was heavy, so we arrived ___ for the interview.","options":["lately","late","later","latest"],"answer":1,"explain":"'Late' means after the expected time; 'lately' means recently."}
+]
+
+Rules:
+- Every option must be a real English word. NEVER output single letters such as "a", "b", "c", "d" as options.
+- Exactly 4 different options per question. The three wrong ones must be real words that almost fit.
+- "answer" is the index (0-3) of the correct option.
+- Mark the gap with three underscores: ___
+- Use everyday and workplace vocabulary a learner will actually need.
+- Do not repeat the two example questions above.`;
+
+  const user = mode === 'grammar' ? grammarUser : vocabUser;
+
+  // Two attempts: junk output on the first try is retried automatically
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      if (attempt === 2) tx('quizLoading', 'Improving the questions…');
+      const raw = await ask(system, user, 2600);
+      const arr = parseJSON(raw);
+      questions = cleanQuestions(arr);
+      if (questions.length >= 3) {
+        hi('quizLoading'); sh('quizBody');
+        tx('quizCount', `0 / ${questions.length}`);
+        renderQuestion();
+        return;
+      }
+    } catch (err) {
+      if (attempt === 2) {
+        tx('quizLoading', 'Could not build questions. Check your connection and try again.');
+        showError(err.message);
+        return;
+      }
+    }
   }
+  tx('quizLoading', 'Could not build usable questions. Please try again.');
+}
+
+/* Throws out malformed or placeholder questions before they reach the screen */
+function cleanQuestions(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr.filter(q => {
+    if (!q || typeof q.prompt !== 'string' || !Array.isArray(q.options)) return false;
+    if (q.options.length !== 4) return false;
+    if (typeof q.answer !== 'number' || q.answer < 0 || q.answer > 3) return false;
+    if (q.prompt.trim().length < 8) return false;
+
+    const opts = q.options.map(o => String(o ?? '').trim());
+    if (opts.some(o => !o)) return false;                              // empty option
+    if (new Set(opts.map(o => o.toLowerCase())).size !== 4) return false;  // duplicates
+    if (opts.every(o => o.length <= 2)) return false;                  // "a","b","c","d" junk
+    if (opts.filter(o => /^[a-d]$/i.test(o)).length >= 2) return false; // letter placeholders
+    if (/<[a-z]/i.test(q.prompt)) return false;                        // unfilled <template>
+    return true;
+  }).map(q => ({
+    prompt: q.prompt.trim(),
+    options: q.options.map(o => String(o).trim()),
+    answer: q.answer,
+    explain: String(q.explain || '').trim(),
+  }));
 }
 
 function renderQuestion() {
@@ -563,8 +713,8 @@ function finishQuiz() {
   tx('quizFinalScore', `${qCorrect} / ${questions.length}`);
   tx('quizFinalNote',
     pct >= 85 ? 'Excellent work. Try the next level up.' :
-      pct >= 60 ? 'Solid. Read the explanations you missed and go again.' :
-        'Keep going — the explanations are where the learning happens.');
+    pct >= 60 ? 'Solid. Read the explanations you missed and go again.' :
+                'Keep going — the explanations are where the learning happens.');
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -600,6 +750,21 @@ function init() {
       chip.classList.add('active');
       speakTopic = chip.dataset.topic;
       $('speakStartBtn').disabled = false;
+    });
+  });
+  document.querySelectorAll('#pausePicker .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#pausePicker .chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      pauseMs = +chip.dataset.pause;
+    });
+  });
+  on('speakDoneBtn', 'click', () => { if (stopAnswering) stopAnswering(); });
+  document.querySelectorAll('#pauseChoice .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#pauseChoice .chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      pauseMs = +chip.dataset.pause;
     });
   });
   on('speakStartBtn', 'click', startSpeaking);

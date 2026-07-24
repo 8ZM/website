@@ -5,13 +5,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fluent — Practice English</title>
-  <meta name="description"
-    content="Free English practice: speak with AI, write and get corrections, grammar drills, and vocabulary training." />
+  <meta name="description" content="Free English practice: speak with AI, write and get corrections, grammar drills, and vocabulary training." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -41,8 +38,7 @@
     <section class="hero">
       <p class="eyebrow">Free · No signup</p>
       <h1 class="hero-title">Practice English<br><span class="accent">until it feels easy</span></h1>
-      <p class="hero-lede">Four ways to train. Speak out loud, write and get corrected, drill grammar, and build
-        vocabulary — all scored instantly.</p>
+      <p class="hero-lede">Four ways to train. Speak out loud, write and get corrected, drill grammar, and build vocabulary — all scored instantly.</p>
     </section>
 
     <section class="modes">
@@ -98,6 +94,21 @@
         <button class="chip" data-topic="Food and restaurants">Restaurants</button>
         <button class="chip" data-topic="Free conversation about anything">Anything</button>
       </div>
+      <h2 class="panel-title" style="margin-top:26px">How long should it wait when you pause?</h2>
+      <div class="chip-row" id="pausePicker">
+        <button class="chip" data-pause="3000">3 seconds</button>
+        <button class="chip active" data-pause="6000">6 seconds</button>
+        <button class="chip" data-pause="10000">10 seconds</button>
+        <button class="chip" data-pause="0">Only when I tap Done</button>
+      </div>
+
+      <label class="field-lbl">When should it take your answer?</label>
+      <div class="chip-row" id="pauseChoice">
+        <button class="chip" data-pause="5000">After 5s of silence</button>
+        <button class="chip active" data-pause="8000">After 8s of silence</button>
+        <button class="chip" data-pause="0">Only when I press Done</button>
+      </div>
+
       <button class="btn-primary" id="speakStartBtn" disabled>Start conversation</button>
       <p class="note" id="speakSupportNote"></p>
     </div>
@@ -126,7 +137,14 @@
       <div class="panel mic-panel">
         <div class="orb" id="speakOrb"><span id="orbIcon">🎧</span></div>
         <p class="mic-status" id="speakStatus">Getting ready…</p>
+
+        <div class="live-say hidden" id="liveSay">
+          <span id="liveSayText"></span><span class="caret"></span>
+        </div>
+        <div class="pause-hint hidden" id="pauseHint"></div>
+
         <div class="mic-actions">
+          <button class="btn-primary hidden" id="speakDoneBtn">✓ Done answering</button>
           <button class="btn-primary hidden" id="speakMicBtn">🎤 Answer now</button>
           <button class="btn-quiet" id="speakEndBtn">End conversation</button>
         </div>
@@ -203,9 +221,7 @@
     </div>
 
     <div class="quiz-bar">
-      <div class="quiz-progress">
-        <div class="quiz-progress-fill" id="quizProgress"></div>
-      </div>
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="quizProgress"></div></div>
       <span class="quiz-count" id="quizCount">0 / 0</span>
       <span class="quiz-score" id="quizScore">0 correct</span>
     </div>
@@ -228,7 +244,7 @@
     </div>
   </main>
 
-  <script src="script.js?v=1"></script>
+  <script src="script.js?v=2"></script>
 </body>
 
 </html>
