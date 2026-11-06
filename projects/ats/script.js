@@ -109,6 +109,10 @@ const GROQ_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
 let groqModel = null;
 
 async function ai(system, user, maxTok = 2000) {
+  return aiChat(system, [{ role: 'user', content: user }], maxTok);
+}
+
+async function aiChat(system, messages, maxTok = 2000) {
   if (!API_PROXY_URL && !GROQ_API_KEY) {
     throw new Error(t.app.errKey);
   }
@@ -127,10 +131,7 @@ async function ai(system, user, maxTok = 2000) {
           headers,
           body: JSON.stringify({
             model,
-            messages: [
-              { role: 'system', content: system },
-              { role: 'user', content: user },
-            ],
+            messages: [{ role: 'system', content: system }, ...messages],
             max_tokens: maxTok,
             temperature: 0.4,
           }),
@@ -1687,6 +1688,219 @@ function showErr(id, msg) { const e = $(id); if (e) { e.textContent = msg; e.cla
 /* ════════════════════════════════════════════════════════════════
    INIT
    ════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════
+   INTERVIEW CALL — voice mock interview (TTS + Speech Recognition)
+   ════════════════════════════════════════════════════════════════ */
+const MAX_QUESTIONS = 6;
+let callActive = false;
+let callHistory = [];       // Groq conversation
+let answerCount = 0;
+let recognition = null;
+let callVoice = null;
+
+function speechSupported(){
+  return ('speechSynthesis' in window) && (window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+
+function pickVoice(){
+  const voices = speechSynthesis.getVoices();
+  return voices.find(v=>/en[-_]US/i.test(v.lang) && /Google|Microsoft/i.test(v.name))
+      || voices.find(v=>/^en/i.test(v.lang))
+      || voices[0] || null;
+}
+if('speechSynthesis' in window){
+  speechSynthesis.onvoiceschanged = ()=>{ callVoice = pickVoice(); };
+}
+
+function setCallStatus(txt, mode){
+  tx('callStatus', txt);
+  const av = $('callAvatar');
+  if(av){ av.classList.remove('speaking','listening','thinking'); if(mode) av.classList.add(mode); }
+}
+
+function addTranscript(who, text){
+  const box = $('callTranscript');
+  if(!box) return;
+  const row = document.createElement('div');
+  row.className = 'ct-row ' + (who==='ai' ? 'ct-ai' : 'ct-user');
+  row.innerHTML = `<span class="ct-who">${who==='ai'?'Interviewer':'You'}</span><span>${esc(text)}</span>`;
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
+}
+
+function speak(text){
+  return new Promise(resolve=>{
+    if(!('speechSynthesis' in window)){ resolve(); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    if(!callVoice) callVoice = pickVoice();
+    if(callVoice) u.voice = callVoice;
+    u.rate = 0.98; u.pitch = 1;
+    u.onend = resolve;
+    u.onerror = resolve;
+    speechSynthesis.speak(u);
+  });
+}
+
+function listenOnce(){
+  return new Promise((resolve)=>{
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false;
+    let got = false;
+    recognition.onresult = (e)=>{
+      got = true;
+      resolve(e.results[0][0].transcript);
+    };
+    recognition.onerror = ()=>{ if(!got) resolve(null); };
+    recognition.onend  = ()=>{ if(!got) resolve(null); };
+    try{ recognition.start(); }catch{ resolve(null); }
+  });
+}
+
+function stopListening(){
+  try{ recognition && recognition.stop(); }catch{}
+}
+
+async function startInterviewCall(){
+  if(!speechSupported()){
+    alert('Voice interview requires Chrome or Edge browser with microphone access.');
+    return;
+  }
+  // Ask mic permission early
+  try{ await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch{ alert('Microphone access is required for the interview call.'); return; }
+
+  callActive = true;
+  callHistory = [];
+  answerCount = 0;
+  sh('callOverlay');
+  $('callTranscript').innerHTML = '';
+  hi('callReport'); sh('callLive');
+  setCallStatus('Connecting…','thinking');
+
+  const system = `You are a professional, friendly job interviewer conducting a live spoken mock interview.
+CANDIDATE RESUME:
+${resumeText.slice(0,4000)}
+
+JOB DESCRIPTION:
+${jdText.slice(0,3000)}
+
+RULES:
+- Ask ONE question at a time. Total of ${MAX_QUESTIONS} questions across the interview: mix of HR, behavioral, and technical questions tailored to this job and resume.
+- Keep each turn SHORT and natural for speech: max 40 words. Brief acknowledgment of their previous answer (one short sentence), then the next question.
+- Plain conversational text only — no lists, no markdown, no emojis, no stage directions.
+- Start now by greeting the candidate by first name and asking question 1.`;
+
+  try{
+    const opening = await aiChat(system, [{role:'user',content:'Begin the interview.'}], 200);
+    callHistory = [
+      {role:'user',content:'Begin the interview.'},
+      {role:'assistant',content:opening},
+    ];
+    callSystem = system;
+    await interviewerSays(opening);
+  }catch(err){
+    setCallStatus('Error: '+err.message,'');
+  }
+}
+
+let callSystem = '';
+
+async function interviewerSays(text){
+  if(!callActive) return;
+  addTranscript('ai', text);
+  setCallStatus('Interviewer is speaking…','speaking');
+  await speak(text);
+  if(!callActive) return;
+  await listenForAnswer();
+}
+
+async function listenForAnswer(){
+  if(!callActive) return;
+  setCallStatus('Listening… speak your answer','listening');
+  const answer = await listenOnce();
+  if(!callActive) return;
+  if(!answer){
+    setCallStatus('Didn\u2019t catch that — tap the mic to answer again','');
+    sh('callMicBtn');
+    return;
+  }
+  hi('callMicBtn');
+  addTranscript('user', answer);
+  answerCount++;
+  setCallStatus('Thinking…','thinking');
+  callHistory.push({role:'user',content:answer});
+
+  try{
+    let nudge = '';
+    if(answerCount >= MAX_QUESTIONS){
+      nudge = '\n\n(SYSTEM: That was the final answer. Thank the candidate warmly, tell them the interview is complete, and say goodbye in under 30 words. Do NOT ask another question.)';
+    }
+    const msgs = [...callHistory];
+    if(nudge) msgs[msgs.length-1] = {role:'user',content:answer+nudge};
+    const reply = await aiChat(callSystem, msgs, 200);
+    callHistory.push({role:'assistant',content:reply});
+
+    if(answerCount >= MAX_QUESTIONS){
+      addTranscript('ai', reply);
+      setCallStatus('Interview complete','speaking');
+      await speak(reply);
+      await showCallReport();
+    }else{
+      await interviewerSays(reply);
+    }
+  }catch(err){
+    setCallStatus('Error: '+err.message,'');
+  }
+}
+
+async function retryMic(){
+  hi('callMicBtn');
+  await listenForAnswer();
+}
+
+async function showCallReport(){
+  setCallStatus('Preparing your feedback report…','thinking');
+  try{
+    const evalPrompt = `The mock interview transcript is above. Now act as an interview coach and write a concise performance report for the candidate.
+
+Format exactly:
+OVERALL SCORE: <X>/10
+
+STRENGTHS:
+- <point>
+- <point>
+
+AREAS TO IMPROVE:
+- <point>
+- <point>
+
+TIP FOR THE REAL INTERVIEW:
+<one specific actionable tip>
+
+Keep it honest, specific to their actual answers, and under 180 words.`;
+    const report = await aiChat(callSystem, [...callHistory, {role:'user',content:evalPrompt}], 500);
+    hi('callLive');
+    sh('callReport');
+    tx('callReportText', report);
+    setCallStatus('Interview complete','');
+  }catch(err){
+    setCallStatus('Report error: '+err.message,'');
+  }
+}
+
+function endInterviewCall(){
+  callActive = false;
+  stopListening();
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  hi('callOverlay');
+}
+
 /* Safe listener helper — page never breaks if an element is missing */
 function on(id, ev, fn) {
   const el = document.getElementById(id);
@@ -1708,6 +1922,11 @@ function init() {
     if (b) renderTab(parseInt(b.dataset.tab));
   });
   on('genAllBtn', 'click', generateAll);
+
+  on('startCallBtn', 'click', startInterviewCall);
+  on('endCallBtn', 'click', endInterviewCall);
+  on('closeCallBtn', 'click', endInterviewCall);
+  on('callMicBtn', 'click', retryMic);
 
   try { initStep1(); } catch (e) { console.error('initStep1:', e); }
   try { initStep2(); } catch (e) { console.error('initStep2:', e); }

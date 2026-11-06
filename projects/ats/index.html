@@ -290,6 +290,16 @@
           <div id="tabContent"></div>
         </div>
 
+        <!-- Interview Call -->
+        <div class="card call-card">
+          <div class="call-card-info">
+            <h3>🎙️ Live Mock Interview</h3>
+            <p>Practice with a voice interviewer. It asks questions based on your resume and this job, listens to your spoken answers, and gives you a performance report.</p>
+            <p class="call-hint">Requires Chrome or Edge · Microphone · English</p>
+          </div>
+          <button class="btn-primary" id="startCallBtn">Prepare Interview Call</button>
+        </div>
+
         <!-- Generate All -->
         <div id="genAllWrap" class="gen-all">
           <button class="btn-primary btn-lg" id="genAllBtn">⚡ Generate Everything</button>
@@ -299,11 +309,35 @@
     </div>
   </div><!-- /appWizard -->
 
+  <!-- ═══════════ INTERVIEW CALL OVERLAY ═══════════ -->
+  <div id="callOverlay" class="call-overlay hidden">
+    <div class="call-box">
+
+      <div id="callLive">
+        <div class="call-avatar" id="callAvatar">
+          <div class="call-avatar-ring"></div>
+          <div class="call-avatar-core">👤</div>
+        </div>
+        <p class="call-status" id="callStatus">Connecting…</p>
+        <button class="btn-secondary btn-sm hidden" id="callMicBtn">🎤 Tap to answer</button>
+        <div class="call-transcript" id="callTranscript"></div>
+        <button class="btn-end-call" id="endCallBtn">✕ End Call</button>
+      </div>
+
+      <div id="callReport" class="hidden">
+        <h3 class="call-report-title">Interview Performance Report</h3>
+        <div class="call-report-text" id="callReportText"></div>
+        <button class="btn-primary" id="closeCallBtn">Close</button>
+      </div>
+
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
-  <script src="script.js?v=6"></script>
+  <script src="script.js?v=7"></script>
 </body>
 
 </html>
