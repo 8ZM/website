@@ -103,37 +103,60 @@ const hi = id => { const e = $(id); if (e) e.classList.add('hidden'); };
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /* ════════════════════════════════════════════════════════════════
-   GROQ API — free & fast (console.groq.com)
-   ════════════════════════════════════════════════════════════════ */
-const GROQ_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
-let groqModel = null;
+   GROQ API — free tier (console.groq.com)
 
-async function ai(system, user, maxTok = 2000) {
-  return aiChat(system, [{ role: 'user', content: user }], maxTok);
+   Groq retired llama-3.1-8b-instant and llama-3.3-70b-versatile on
+   2026-08-16. When Groq retires models again, edit ONLY this list.
+   Order = fallback order. A model that is gone is skipped automatically.
+   ════════════════════════════════════════════════════════════════ */
+const GROQ_MODELS = [
+  // gpt-oss models "think" before answering, and thinking tokens count toward the
+  // reply limit — so we ask for low effort, hide the thinking, and reserve headroom.
+  { id: 'openai/gpt-oss-120b', tpm: 8000, headroom: 400, extra: { reasoning_effort: 'low', include_reasoning: false } },
+  { id: 'openai/gpt-oss-20b',  tpm: 8000, headroom: 400, extra: { reasoning_effort: 'low', include_reasoning: false } },
+  { id: 'qwen/qwen3.6-27b',    tpm: 6000, headroom: 0,   extra: { reasoning_effort: 'none' } },
+];
+const GROQ_TEMPERATURE = 0.4;
+
+const estTokens = str => Math.ceil(String(str).length / 3.4);
+let groqModel = null;                       // id of the last model that worked
+
+function modelOrder() {
+  const first = GROQ_MODELS.find(m => m.id === groqModel);
+  return first ? [first, ...GROQ_MODELS.filter(m => m !== first)] : GROQ_MODELS;
 }
+
+const wait = ms => new Promise(r => setTimeout(r, ms));
 
 async function aiChat(system, messages, maxTok = 2000) {
   if (!API_PROXY_URL && !GROQ_API_KEY) {
     throw new Error(t.app.errKey);
   }
-  const models = groqModel ? [groqModel, ...GROQ_MODELS.filter(m => m !== groqModel)] : GROQ_MODELS;
+  const promptTok = estTokens(system) + messages.reduce((n, m) => n + estTokens(m.content), 0);
   let lastErr = null;
 
-  for (const model of models) {
-    // Up to 2 attempts per model (handles rate-limit spikes)
-    for (let attempt = 0; attempt < 2; attempt++) {
+  for (const cfg of modelOrder()) {
+    let head = cfg.headroom;
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      // Size the reply so prompt + reply + thinking fit this model's per-minute ceiling
+      const ceiling = cfg.tpm - promptTok - 300 - head;
+      const budget = Math.min(maxTok, Math.max(350, ceiling));
+
       try {
         const endpoint = API_PROXY_URL || 'https://api.groq.com/openai/v1/chat/completions';
         const headers = { 'Content-Type': 'application/json' };
         if (!API_PROXY_URL) headers['Authorization'] = `Bearer ${GROQ_API_KEY}`;
+
         const res = await fetch(endpoint, {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            model,
+            model: cfg.id,
             messages: [{ role: 'system', content: system }, ...messages],
-            max_tokens: maxTok,
-            temperature: 0.4,
+            max_tokens: budget + head,
+            temperature: GROQ_TEMPERATURE,
+            ...cfg.extra,
           }),
         });
         if (!res.ok) {
@@ -143,28 +166,49 @@ async function aiChat(system, messages, maxTok = 2000) {
           throw err;
         }
         const d = await res.json();
-        groqModel = model;
-        console.log('✓ Using Groq model:', model);
-        return d.choices?.[0]?.message?.content || '';
+        const out = d.choices?.[0]?.message?.content || '';
+        if (!out.trim()) {                       // thinking used the whole allowance
+          const err = new Error('The model returned an empty reply.');
+          err.status = 'empty';
+          throw err;
+        }
+        groqModel = cfg.id;
+        return out;
+
       } catch (err) {
         lastErr = err;
-        // 429 = rate limited → wait & retry once, then try next model
-        if (err.status === 429 && attempt === 0) {
-          console.warn('⏳ Rate limited, retrying in 3s:', model);
-          await new Promise(r => setTimeout(r, 3000));
-          continue;
-        }
-        // Model unavailable → next model
-        if (err.status === 404 || err.status === 400 || err.status === 429 || err.status === 503) {
-          console.warn('✗ Skipping model:', model, '—', err.message);
-          groqModel = null;
-          break;
-        }
-        throw err; // auth or other fatal errors → stop
+        const msg = String(err.message || '');
+
+        // Learn the real per-minute limit from Groq's own error message
+        const lim = msg.match(/Limit\s+(\d+)/i);
+        if (lim && /tokens per minute|TPM/i.test(msg)) cfg.tpm = +lim[1];
+
+        const gone = /does not exist|do not have access|decommission|no longer (available|supported)|model_not_found|deprecated/i.test(msg);
+        const tooLarge = err.status === 413 || /too large|reduce your message|tokens per minute|\bTPM\b/i.test(msg);
+        const rateLimited = err.status === 429 && !tooLarge;
+
+        if (gone) break;                                              // retired → next model
+        if (err.status === 'empty' && attempt < 2) { head += 600; continue; }
+        if (tooLarge && attempt < 2) continue;                        // budget re-sized from learned limit
+        if (rateLimited && attempt === 0) { await wait(2500); continue; }
+        if (err.status === 'empty' || [400, 404, 413, 429, 503].includes(err.status)) break;
+        throw err;                                                    // auth or network → stop
       }
     }
   }
-  throw lastErr || new Error('No Groq model available — check your API key');
+
+  const m = String(lastErr?.message || '');
+  if (/does not exist|do not have access|decommission|no longer|model_not_found|deprecated/i.test(m)) {
+    throw new Error('Every AI model in the list has been retired by Groq. The site owner needs to update GROQ_MODELS.');
+  }
+  if (/tokens per minute|too large|rate limit/i.test(m)) {
+    throw new Error('Free-tier limit reached for this minute. Wait about 60 seconds and try again.');
+  }
+  throw lastErr || new Error('No AI model available.');
+}
+
+async function ai(system, user, maxTok = 2000) {
+  return aiChat(system, [{ role: 'user', content: user }], maxTok);
 }
 
 // Backwards-compatible alias (rest of the code calls gemini())
